@@ -48,7 +48,7 @@ class Menu extends React.Component {
         // Start Here
         // ...
 
-        const input = e.target.value;
+        const input = e.target.value.trim();
         this.setState({searchKeyword: input, showAllResults: false});
         
         if (input.length > 2) {
