@@ -34,6 +34,7 @@ class Menu extends React.Component {
         e.preventDefault();
         this.setState({
             showingSearch: !this.state.showingSearch,
+            showAllResults: false,
         });
     }
 
@@ -48,7 +49,7 @@ class Menu extends React.Component {
         // ...
 
         const input = e.target.value;
-        this.setState({searchKeyword: input});
+        this.setState({searchKeyword: input, showAllResults: false});
         
         if (input.length > 2) {
             // set pending for fetch
