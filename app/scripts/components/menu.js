@@ -1,0 +1,147 @@
+/**
+ * This file will hold the Menu that lives at the top of the Page, this is all rendered using a React Component...
+ * 
+ */
+import React, { useState } from 'react';
+import { MAX_NUM_RESULTS_SHOWING } from '../constants';
+import { fetchResultsByKeyword } from '../queries';
+import Card from './card';
+import EmptyNote from './emptyNote';
+
+class Menu extends React.Component {
+
+    /**
+     * Main constructor for the Menu Class
+     * @memberof Menu
+     */
+    constructor() {
+        super();
+        this.state = {
+            isPending: false,
+            showingSearch: false,
+            searchKeyword: '',
+            searchResults: [],
+        };
+    }
+
+    /**
+     * Shows or hides the search container
+     * @memberof Menu
+     * @param e [Object] - the event from a click handler
+     */
+    showSearchContainer(e) {
+        e.preventDefault();
+        this.setState({
+            showingSearch: !this.state.showingSearch,
+        });
+    }
+
+    /**
+     * Calls upon search change
+     * @memberof Menu
+     * @param e [Object] - the event from a text change handler
+     */
+    onSearch(e) {
+
+        // Start Here
+        // ...
+
+        const input = e.target.value;
+        this.setState({searchKeyword: input});
+        
+        if (input.length > 2) {
+            // set pending for fetch
+            this.setState({isPending: true});
+
+            // do fetch
+            fetchResultsByKeyword(input)
+                .then((data) => this.setState({ 
+                    searchResults: data, 
+                    isPending: false, // reset pending state
+                 }));
+        } else {
+            this.setState({ 
+                searchResults: [], 
+                isPending: false, // reset pending state
+            });
+        }
+    }
+
+    /**
+     * Get search results element. Returns Cards elements which wrapped in a container if there are search result;
+     * otherwise, returns empty note.
+     * 
+     * @returns JSX
+     * @memberof Menu
+    */
+    getSearchResultsJsx() {
+        const {searchResults, searchKeyword, isPending} = this.state;
+        const resultLength = searchResults.length
+        
+        if (resultLength > 0) {
+            const resultHeaderMsg = `DISPLAYING ${resultLength > 3 ? 4 : resultLength} OF ${resultLength} RESULTS `;
+            const showResults = searchResults.slice(0, 4);
+            return (
+                <>
+                    <div className='result-header'>
+                        <a>{resultHeaderMsg} <u>SEE ALL RESULTS</u></a>
+                    </div>
+                    <div className='card-container'>
+                        {showResults.map((res) => <Card item={res} key={res._id} />)}
+                    </div>
+                </>
+            );
+        } else {
+            return (searchKeyword.length > 2 && !isPending) && (
+                <EmptyNote searchKeyword={searchKeyword} />
+            );
+        }
+    }
+
+    /**
+     * Renders the default app in the window, we have assigned this to an element called root.
+     * 
+     * @returns JSX
+     * @memberof App
+    */
+    render() {
+        const searchContainerClassName = `${this.state.showingSearch ? 'showing ' : ''}search-container${this.state.isPending ? ' pending' : ''}`;
+
+        return (
+            <header className="menu">
+                <div className="menu-container">
+                    <div className="menu-holder">
+                        <h1>ELC</h1>
+                        <nav>
+                            <a href="#" className="nav-item">HOLIDAY</a>
+                            <a href="#" className="nav-item">WHAT'S NEW</a>
+                            <a href="#" className="nav-item">PRODUCTS</a>
+                            <a href="#" className="nav-item">BESTSELLERS</a>
+                            <a href="#" className="nav-item">GOODBYES</a>
+                            <a href="#" className="nav-item">STORES</a>
+                            <a href="#" className="nav-item">INSPIRATION</a>
+
+                            <a href="#" onClick={(e) => this.showSearchContainer(e)}>
+                                <i className="material-icons search">search</i>
+                            </a>
+                        </nav>
+                    </div>
+                </div>
+                <div>
+                    <div className={searchContainerClassName}>
+                        <input className={`${this.state.isPending ? 'pending' : ''}`} type="text" onChange={(e) => this.onSearch(e)} />
+                        <a href="#" onClick={(e) => this.showSearchContainer(e)}>
+                            <i className="material-icons close">close</i>
+                        </a>
+                        {this.getSearchResultsJsx()}
+                    </div>
+                </div>
+            </header>
+        );
+    }
+
+
+};
+
+// Export out the React Component
+module.exports = Menu;
