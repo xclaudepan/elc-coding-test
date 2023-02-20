@@ -19,6 +19,7 @@ class Menu extends React.Component {
         this.state = {
             isPending: false,
             showingSearch: false,
+            showAllResults: false,
             searchKeyword: '',
             searchResults: [],
         };
@@ -68,6 +69,18 @@ class Menu extends React.Component {
     }
 
     /**
+     * Show all or MAX_NUM_RESULTS_SHOWING number of search results.
+     * @memberof Menu
+     * @param e [Object] - the event from a click handler
+     */
+    handleShowResults(e) {
+        e.preventDefault();
+        this.setState({
+            showAllResults: !this.state.showAllResults,
+        });
+    }
+
+    /**
      * Get search results element. Returns Cards elements which wrapped in a container if there are search result;
      * otherwise, returns empty note.
      * 
@@ -75,16 +88,18 @@ class Menu extends React.Component {
      * @memberof Menu
     */
     getSearchResultsJsx() {
-        const {searchResults, searchKeyword, isPending} = this.state;
+        const {searchResults, searchKeyword, showAllResults, isPending} = this.state;
         const resultLength = searchResults.length
         
         if (resultLength > 0) {
-            const resultHeaderMsg = `DISPLAYING ${resultLength > 3 ? 4 : resultLength} OF ${resultLength} RESULTS `;
-            const showResults = searchResults.slice(0, 4);
+            const showResults = showAllResults ? searchResults : searchResults.slice(0, MAX_NUM_RESULTS_SHOWING);
+            const resultHeaderText = `DISPLAYING ${showResults.length} OF ${resultLength} RESULTS `;
             return (
                 <>
                     <div className='result-header'>
-                        <a>{resultHeaderMsg} <u>SEE ALL RESULTS</u></a>
+                        <a onClick={(e) => this.handleShowResults(e)}>{resultHeaderText} 
+                            <u>{showAllResults ? 'SEE LESS RESULTS' : 'SEE ALL RESULTS'}</u>
+                        </a>
                     </div>
                     <div className='card-container'>
                         {showResults.map((res) => <Card item={res} key={res._id} />)}
